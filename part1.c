@@ -90,6 +90,11 @@ int main(int argc, const char *argv[])
   for (i = 0; i < PAGES; i++) {
     pagetable[i] = -1;
   }
+  // Fill tlb entries with -1 for initially empty tlb
+  for (i = 0; i < TLB_SIZE; i++){
+    tlb[i].logical = -1;
+    tlb[i].physical = -1;
+  }
   
   // Character buffer for reading lines of input file.
   char buffer[BUFFER_SIZE];
