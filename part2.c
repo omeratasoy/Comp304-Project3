@@ -81,9 +81,28 @@ void add_to_tlb(unsigned int logical, unsigned int physical) {
 
 int main(int argc, const char *argv[])
 {
-  if (argc != 3) {
-    fprintf(stderr, "Usage ./virtmem backingstore input\n");
+  if (argc != 5) {
+    fprintf(stderr, "Usage ./virtmem backingstore input -p 0/1\n");
     exit(1);
+  }
+
+  if (strcmp(argv[3], "-p")){
+    fprintf(stderr, "Usage ./virtmem backingstore input -p 0/1\n");
+    fprintf(stderr, "3rd argument should be -p\n");
+    exit(1);
+  }
+
+  if (strcmp(argv[4], "0") && strcmp(argv[4], "1")){
+    fprintf(stderr, "Usage ./virtmem backingstore input -p 0/1\n");
+    fprintf(stderr, "4th argument should be 0 or 1\n");
+    exit(1);
+  }
+
+  if (!strcmp(argv[4], "0")){
+    using_lru = 0;
+  }
+  else if (!strcmp(argv[4], "1")){
+    using_lru = 1;
   }
   
   const char *backing_filename = argv[1]; 
