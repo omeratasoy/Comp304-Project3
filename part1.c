@@ -61,8 +61,14 @@ int search_tlb(unsigned int logical_page) { // gives the same output as the samp
 }
 
 /* Adds the specified mapping to the TLB, replacing the oldest mapping (FIFO replacement). */
-void add_to_tlb(unsigned char logical, unsigned char physical) {
+void add_to_tlb(unsigned int logical, unsigned int physical) { // gives the same output as the sample if changed back to char, we changed it to int since page/frame numbers are 10 bits long
     /* TODO */
+    // swap out the entry at the circularly accessed tlbindex with the input
+    struct tlbentry my_entry;
+    my_entry.logical = logical;
+    my_entry.physical = physical;
+    tlb[tlbindex % TLB_SIZE] = my_entry;
+    tlbindex++;
 }
 
 int main(int argc, const char *argv[])
