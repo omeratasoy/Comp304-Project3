@@ -124,10 +124,27 @@ int main(int argc, const char *argv[])
       // TLB miss
     } else {
       physical_page = pagetable[logical_page];
-      
       // Page fault
       if (physical_page == -1) {
           /* TODO */
+          // go to the desired page in the backing store and copy its contents to the main memory using my_page as a temporary variable
+          char my_page[PAGE_SIZE];
+          FILE *backing_file = fopen(backing_filename, "r");
+          fseek(backing_file, logical_page * PAGE_SIZE, SEEK_SET);
+          fread(my_page, PAGE_SIZE, sizeof(char), backing_file);
+          fclose(backing_file);
+          //strncpy(&main_memory[free_page * PAGE_SIZE], my_page, PAGE_SIZE); // commented out since it did not copy after a null character is encountered
+          for (int i = 0; i < PAGE_SIZE; i++){
+            main_memory[free_page * PAGE_SIZE + i] = my_page[i];
+          }
+          // save the physical page number at the pagetable
+          pagetable[logical_page] = free_page;
+          // assign free_page to physical_page to be accessed later
+          physical_page = free_page;
+          // increment free_page to replace the next location in the memory next time a page fault occurs
+          free_page++;
+          // a page fault occured, increment page fault counter
+          page_faults++;
       }
 
       add_to_tlb(logical_page, physical_page);
