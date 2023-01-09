@@ -26,8 +26,8 @@
 #define BUFFER_SIZE 10
 
 struct tlbentry {
-  unsigned char logical;
-  unsigned char physical;
+  unsigned int logical;
+  unsigned int physical;
 };
 
 // TLB is kept track of as a circular array, with the oldest element being overwritten once the TLB is full.
