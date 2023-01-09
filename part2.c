@@ -1,5 +1,5 @@
 /**
- * virtmem.c 
+ * part2.c 
  */
 
 #include <stdio.h>
@@ -12,13 +12,15 @@
 
 #define TLB_SIZE 16
 #define PAGES 1024
-#define PAGE_MASK /* TODO */
+#define FRAMES 256
+#define PAGE_MASK   0b00000000000011111111110000000000
 
 #define PAGE_SIZE 1024
 #define OFFSET_BITS 10
-#define OFFSET_MASK /* TODO */
+#define OFFSET_MASK 0b00000000000000000000001111111111
 
-#define MEMORY_SIZE PAGES * PAGE_SIZE
+#define MEMORY_SIZE FRAMES * PAGE_SIZE
+#define BACKING_SIZE PAGES * PAGE_SIZE
 
 // Max number of characters per line of input file to read.
 #define BUFFER_SIZE 10
