@@ -155,6 +155,85 @@ int main(int argc, const char *argv[])
       // Page fault
       if (physical_page == -1) {
           /* TODO */
+          // no need to use page replace ment if there are free pages available in the memory
+          if (free_page >= FRAMES){
+            if (!using_lru){ // FIFO
+              // swap out main_memory[(free_page % FRAMES)*PAGE_SIZE]
+              // make it unavailable in tlb and pagetable
+              // to_remove_physical is free_page % FRAMES
+              int to_remove_logical;
+              for (int i = 0; i < PAGES; i++){ // unavailable at pagetable
+                if ((free_page % FRAMES) == pagetable[i]){ // free_page % FRAMES shows the first address to be put into the memory
+                  to_remove_logical = i; // logical page corresponding to free_page % FRAMES is to be removed
+                  pagetable[i] = -1; // make it unavailable at the page table
+                  break;
+                }
+              }
+              for (int i = 0; i < TLB_SIZE; i++){ // unavailable at tlb
+                if (to_remove_logical == tlb[i].logical){ // search for the logical page to be removed in the tlb
+                  tlb[i].physical = -1; // set its physical value to -1 (unavailable)
+                  break;
+                }
+              }
+
+            }
+            else { // LRU
+              // set lru_on to 1 to switch from filling the memory to replacing the least recently used ones
+              lru_on = 1;
+              int to_remove_logical;
+              int max_uses = -1;
+              lrused = -1;
+              for (int i = 0; i < FRAMES; i++){ // find the frame with the highest lru value (the least recently used one)
+                if (lru[i] >= max_uses){
+                  max_uses = lru[i];
+                  lrused = i; // frame to be replaces
+                }
+              }
+              for (int i = 0; i < PAGES; i++){ // unavailable at pagetable
+                if ((lrused) == pagetable[i]){ // lrused shows the first address to be put into the memory
+                  to_remove_logical = i; // logical page corresponding to lrused is to be removed
+                  pagetable[i] = -1; // make it unavailable at the page table
+                  break;
+                }
+              }
+              for (int i = 0; i < TLB_SIZE; i++){ // unavailable at tlb
+                if (to_remove_logical == tlb[i].logical){ // search for the logical page to be removed in the tlb
+                  tlb[i].physical = -1; // set its physical value to -1 (unavailable)
+                  break;
+                }
+              }
+            }
+          }
+          // go to the desired page in the backing store and copy its contents to the main memory using my_page as a temporary variable
+          char my_page[PAGE_SIZE];
+          FILE *backing_file = fopen(backing_filename, "r");
+          fseek(backing_file, logical_page * PAGE_SIZE, SEEK_SET);
+          fread(my_page, PAGE_SIZE, sizeof(char), backing_file);
+          fclose(backing_file);
+          if (!lru_on){
+            //strncpy(&main_memory[(free_page % FRAMES) * PAGE_SIZE], my_page, PAGE_SIZE); // commented out since it did not copy after a null character is encountered
+            for (int i = 0; i < PAGE_SIZE; i++){
+              main_memory[(free_page % FRAMES) * PAGE_SIZE + i] = my_page[i];
+            }
+            // save the physical page number at the pagetable by circularly indexing the memory
+            pagetable[logical_page] = free_page % FRAMES;
+            // assign free_page to physical_page to be accessed later by circularly indexing the memory
+            physical_page = free_page % FRAMES;
+          }
+          else {
+            // put the new page in place of the least recently used one
+            for (int i = 0; i < PAGE_SIZE; i++){
+              main_memory[(lrused) * PAGE_SIZE + i] = my_page[i];
+            }
+            // save the physical page number at the pagetable
+            pagetable[logical_page] = lrused;
+            // assign lrused to physical_page to be accessed later
+            physical_page = lrused;
+          }
+          // increment free_page to replace the next location in the memory next time a page fault occurs
+          free_page++;
+          // a page fault occured, increment page fault counter
+          page_faults++;
       }
 
       add_to_tlb(logical_page, physical_page);
@@ -162,6 +241,12 @@ int main(int argc, const char *argv[])
     
     int physical_address = (physical_page << OFFSET_BITS) | offset;
     signed char value = main_memory[physical_page * PAGE_SIZE + offset];
+    // increment the lru value of all addresses to "age" them
+    for (int i = 0; i < FRAMES; i++){
+      lru[i]++;
+    }
+    // set the lru value of the most recently used address
+    lru[physical_page] = 0;
     
     printf("Virtual address: %d Physical address: %d Value: %d\n", logical_address, physical_address, value);
   }
