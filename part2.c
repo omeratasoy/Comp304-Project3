@@ -43,6 +43,12 @@ signed char main_memory[MEMORY_SIZE];
 // Pointer to memory mapped backing file
 signed char *backing;
 
+// 1 if using LRU, 0 if using FIFO
+int using_lru = -1;
+
+// higher value in the lru array means less recently used
+int lru[FRAMES];
+
 int max(int a, int b)
 {
   if (a > b)
