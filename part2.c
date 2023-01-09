@@ -130,6 +130,8 @@ int main(int argc, const char *argv[])
   int total_addresses = 0;
   int tlb_hits = 0;
   int page_faults = 0;
+  int lru_on = 0;
+  int lrused;
   
   // Number of the next unallocated physical page in main memory
   unsigned int free_page = 0;
