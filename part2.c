@@ -57,8 +57,15 @@ int max(int a, int b)
 }
 
 /* Returns the physical address from TLB or -1 if not present. */
-int search_tlb(unsigned char logical_page) {
+int search_tlb(unsigned int logical_page) {
+  // look at each element in tlb and return the physical page if its logical counterpart matches the input
     /* TODO */
+    for (int i = 0; i < TLB_SIZE; i++){
+      if (logical_page == tlb[i].logical){
+        return tlb[i].physical;
+      }
+    }
+    return -1;
 }
 
 /* Adds the specified mapping to the TLB, replacing the oldest mapping (FIFO replacement). */
