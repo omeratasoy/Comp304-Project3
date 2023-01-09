@@ -24,8 +24,8 @@
 #define BUFFER_SIZE 10
 
 struct tlbentry {
-  unsigned char logical;
-  unsigned char physical;
+  unsigned int logical; // gives the same output as the sample if changed back to char, we changed it to int since page/frame numbers are 10 bits long
+  unsigned int physical; // gives the same output as the sample if changed back to char, we changed it to int since page/frame numbers are 10 bits long
 };
 
 // TLB is kept track of as a circular array, with the oldest element being overwritten once the TLB is full.
