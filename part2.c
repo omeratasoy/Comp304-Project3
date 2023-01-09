@@ -107,7 +107,7 @@ int main(int argc, const char *argv[])
   
   const char *backing_filename = argv[1]; 
   int backing_fd = open(backing_filename, O_RDONLY);
-  backing = mmap(0, MEMORY_SIZE, PROT_READ, MAP_PRIVATE, backing_fd, 0); 
+  backing = mmap(0, BACKING_SIZE, PROT_READ, MAP_PRIVATE, backing_fd, 0); 
   
   const char *input_filename = argv[2];
   FILE *input_fp = fopen(input_filename, "r");
@@ -116,6 +116,11 @@ int main(int argc, const char *argv[])
   int i;
   for (i = 0; i < PAGES; i++) {
     pagetable[i] = -1;
+  }
+  // Fill tlb entries with -1 for initially empty tlb
+  for (i = 0; i < TLB_SIZE; i++){
+    tlb[i].logical = -1;
+    tlb[i].physical = -1;
   }
   
   // Character buffer for reading lines of input file.
