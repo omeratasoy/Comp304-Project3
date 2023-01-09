@@ -132,7 +132,7 @@ int main(int argc, const char *argv[])
   int page_faults = 0;
   
   // Number of the next unallocated physical page in main memory
-  unsigned char free_page = 0;
+  unsigned int free_page = 0;
   
   while (fgets(buffer, BUFFER_SIZE, input_fp) != NULL) {
     total_addresses++;
@@ -140,8 +140,8 @@ int main(int argc, const char *argv[])
 
     /* TODO 
     / Calculate the page offset and logical page number from logical_address */
-    int offset =
-    int logical_page =
+    int offset = logical_address & OFFSET_MASK; // offset is given at the rightmost 10 bits
+    int logical_page = (logical_address & PAGE_MASK) >> OFFSET_BITS; // page number is given at the rightmost 10th to 19th bits, shift to right by OFFSET_BITS to get the actual value
     ///////
     
     int physical_page = search_tlb(logical_page);
